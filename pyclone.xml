@@ -1,7 +1,7 @@
 <tool id="pyclone" name="PyClone Tool: Standard" version="0.1.0">
 
     <requirements>
-        <container type="docker">docker-ccube</container>
+        <container type="docker">docker-pyclone</container>
     </requirements>
 
     <stdio>
