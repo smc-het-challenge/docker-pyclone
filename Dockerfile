@@ -16,4 +16,4 @@ RUN pip install pyyaml \
     && cd /home/
 
 COPY ./run_analysis_pyclone.R /home/pipeline/run_analysis_pyclone.R
-RUN chmod +x /home/pipeline/run_analysis_pyclone.py 
+RUN chmod +x /home/pipeline/run_analysis_pyclone.R
