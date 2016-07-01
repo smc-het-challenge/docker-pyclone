@@ -1,0 +1,33 @@
+<tool id="pyclone" name="PyClone Tool: Standard" version="0.1.0">
+
+    <requirements>
+        <container type="docker">docker-ccube</container>
+    </requirements>
+
+    <stdio>
+        <exit_code range="1:" />
+    </stdio>
+
+    <command><![CDATA[
+        run_analysis_pyclone.R
+        $(input_vcf)
+        $(battenberg_file)
+        $(purity_file)
+    ]]></command>
+
+    <inputs>
+        <param name="input_vcf"  type="data" format="vcf" label="VCF file" />
+        <param name="battenberg_file" type="data" format="tabular" label="Battenberg file" />
+        <param name="purity_file" type="data" format="tabular" label="Battenberg purity file" />
+    </inputs>
+
+    <outputs>
+        <data format="txt" name="1B.txt" label="1B.txt" from_work_dir="1B.txt"/>
+        <data format="pdf" name="clonal_results_summary.pdf" label="clonal_results_summary.pdf" from_work_dir="clonal_results_summary.pdf"/>
+    </outputs>
+
+    <help><![CDATA[
+        ccube purity tool - please see github for help: https://github.com/keyuan/docker-ccube.git
+    ]]></help>
+
+</tool>
