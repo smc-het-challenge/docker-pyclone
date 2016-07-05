@@ -53,7 +53,7 @@ ssm_file <- "ssm_data.txt"
 cnv_file <- "cnv_data.txt"
 
 shellCommandMutectSmcHet <- paste(
-  "python create_ccfclust_inputs.py -v mutect_smchet",
+  "create_ccfclust_inputs.py -v mutect_smchet",
   " -b ", batternbergFile,
   " -c ", 1,
   " -s ", 101,
