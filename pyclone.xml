@@ -22,9 +22,9 @@
         <param name="input_vcf"  type="data" format="vcf" label="VCF file" />
         <param name="battenberg_file" type="data" format="tabular" label="Battenberg file" />
         <param name="purity_file" type="data" format="tabular" label="Battenberg purity file" />
-        <param name="num_mcmc" type="data" value="5000" label="Number of MCMC samples" />
-        <param name="burn_in" type="data" format="2000" label="Burn-In samples" />
-        <param name="max_snv" type="data" format="5000" label="Maximum number of variants in PyClone" />
+        <param name="num_mcmc" type="integer" value="5000" label="Number of MCMC samples" />
+        <param name="burn_in" type="integer" value="2000" label="Burn-In samples" />
+        <param name="max_snv" type="integer" value="5000" label="Maximum number of variants in PyClone" />
     </inputs>
 
     <outputs>
