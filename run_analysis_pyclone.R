@@ -150,7 +150,7 @@ pycloneData <- data.frame(mutation_id = ssm$id, ref_counts = ssm$ref_counts,
                           var_counts = ssm$var_counts,
                           normal_cn = ssm$normal_cn, minor_cn =ssm$minor_cn, major_cn = ssm$major_cn )
 write.table(pycloneData, file=paste0(pycloneFolder, '/pyclone_data.tsv'), quote=FALSE, sep='\t', row.names = F)
-shellCommand <- paste0("/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/PyClone build_mutations_file ", 
+shellCommand <- paste0("PyClone build_mutations_file ", 
                        pycloneFolder, '/pyclone_data.tsv ',
                        pycloneFolder, '/pyclone_mutations.yaml ', 
                        "--var_prior ", "parental_copy_number")
@@ -188,7 +188,7 @@ yamlScript <- cat(paste0("num_iters: ", numMCMC), "\n",
 
 dir.create(pycloneFolder,"/trace")
 
-shellCommand <- paste0("/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/PyClone analyse ", 
+shellCommand <- paste0("PyClone analyse ", 
                        pycloneFolder, '/pyclone_configure.yaml ',
                        "--seed 1234")
 
