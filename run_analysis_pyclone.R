@@ -56,7 +56,6 @@ shellCommandMutectSmcHet <- paste(
   "create_ccfclust_inputs.py -v mutect_smchet",
   " -b ", batternbergFile,
   " -c ", 1,
-  " -s ", 101,
   " --output-cnvs ", cnv_file,
   " --output-variants ", ssm_file,
   " ", vcfFile, sep = ""
