@@ -45,9 +45,9 @@ args <- commandArgs(trailingOnly = TRUE)
 vcfFile <- as.character(args[1])
 batternbergFile <- as.character(args[2])
 purityFile <- as.character(args[3])
-numMCMC <- as.character(args[4])
-burnIn <- as.character(args[5])
-maxSnv <- as.character(args[6]) 
+numMCMC <- as.integer(args[4])
+burnIn <- as.integer(args[5])
+maxSnv <- as.integer(args[6]) 
 
 ssm_file <- "ssm_data.txt"
 cnv_file <- "cnv_data.txt"
