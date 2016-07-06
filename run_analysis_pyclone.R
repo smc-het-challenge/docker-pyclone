@@ -406,7 +406,6 @@ rm(allR)
 ltmat <- as.matrix(labelTrace[-1:-burnIn, ssm$mutation_id])
 ltmat <- ltmat + 1
 psm <- comp.psm(ltmat)
-unique(psm)
 colnames(psm) <- ssm$mutation_id
 rownames(psm) <- ssm$mutation_id
 allRR[ssm$mutation_id, ssm$mutation_id] <- psm
