@@ -229,7 +229,10 @@ for (ii in seq_along(tt)) {
   clusterSd[ii] <- if (tt[ii]/sum(tt) > 0.01 & 
                        nrow(filter(allData, cluster_id == as.integer(names(tt[ii])))) > 1
                        ) {
-    sd(filter(allData, cluster_id == as.integer(names(tt[ii])))$ccf)
+   
+    if (sd(filter(allData, cluster_id == as.integer(names(tt[ii])))$ccf) ==0) {
+      1e-20
+    } else { sd(filter(allData, cluster_id == as.integer(names(tt[ii])))$ccf)}
   } else {NA}
 }
 
@@ -261,9 +264,7 @@ if (nrow(lowSupportData) > 0) {
   lowSupportData$lower_95_ci <- clusterDf$lower_95_ci[lowSupportLabel]
   lowSupportData$upper_95_ci <- clusterDf$upper_95_ci[lowSupportLabel]
   allData <- rbind(allData, lowSupportData)
-  lowSupportR <- data.frame(lowSupportR)
-  colnames(lowSupportR) <- paste0("cluster_", clusterDf$cluster_id)
-  lowSupportR$mutation_id <- lowSupportData$mutation_id
+  rm(lowSupportR)
 }
 
 ## Assign hold-out data
@@ -317,9 +318,7 @@ if(holdOutDataFlag) {
   holdOutData$gene <- NULL
   holdOutData$total_counts <- NULL
   allData <- rbind(allData, holdOutData)
-  holdOutR <- data.frame(holdOutR)
-  colnames(holdOutR) <- paste0("cluster_", clusterDf$cluster_id)
-  holdOutR$mutation_id <- holdOutData$mutation_id
+  rm(holdOutR)
 }
 
 ## Post assign problem SSMs-- temporal solution
@@ -391,9 +390,7 @@ if (problemSsmFlag) {
   
   allData <- rbind(allData, problemSsm)
   
-  problemSsmR <- data.frame(problemSsmR) 
-  colnames(problemSsmR) <- paste0("cluster_", clusterDf$cluster_id)
-  problemSsmR$mutation_id <- problemSsm$mutation_id
+  rm(problemSsmR)
 }
 
 
@@ -404,9 +401,8 @@ allR <- Assign(allData$ccf, clusterDf$average_ccf,
 allRR <- Matrix::tcrossprod(allR)
 colnames(allRR) <- allData$mutation_id
 rownames(allRR) <- allData$mutation_id
+rm(allR)
 
-labelFile <- dir(paste0(pycloneFolder, "/trace/"), pattern = "labels", full.names = T)
-labelTrace <- read.delim(labelFile, stringsAsFactors = F)
 ltmat <- as.matrix(labelTrace[-1:-burnIn, ssm$mutation_id])
 ltmat <- ltmat + 1
 psm <- comp.psm(ltmat)
