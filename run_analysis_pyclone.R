@@ -433,10 +433,12 @@ write.table(tmp11$cluster, file = "2A.txt", sep = "\t", row.names = F, col.names
 
 # subclonal_structure file
 tmp1 <- as.data.frame(table(clusterCertainty$most_likely_assignment), stringsAsFactors = F)
-tmp2 <- as.data.frame(table(clusterCertainty$average_ccf), stringsAsFactors = F)
-tmp <- left_join(tmp1, tmp2, by ="Freq")
-tmp <- rename(tmp, cluster = Var1.x, n_ssms = Freq, proportion = Var1.y)
+tmp1 <- mutate(tmp1, Var1 = as.integer(Var1))
+tmp <- left_join(tmp1, clusterDf, by = c("Var1"="cluster_id"))
+tmp <- rename(tmp, cluster = Var1, n_ssms = Freq, proportion = average_ccf)
 tmp <- mutate(tmp, proportion = as.numeric(proportion) * cellularity)
+tmp$lower_95_ci <- NULL
+tmp$upper_95_ci <- NULL
 write.table(tmp, file = "1C.txt", sep = "\t", row.names = F, col.names = F, quote = F)
 
 # graph summary
