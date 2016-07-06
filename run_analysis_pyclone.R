@@ -414,7 +414,7 @@ psm <- comp.psm(ltmat)
 colnames(psm) <- ssm$mutation_id
 rownames(psm) <- ssm$mutation_id
 allRR[ssm$mutation_id, ssm$mutation_id] <- psm
-
+diag(allRR) <- 1
 write.table(allRR, file = "2B.txt", sep = "\t", row.names = F, col.names = F, quote = F)
 
 
@@ -423,14 +423,6 @@ clusterCertainty <- subset(allData,
                            select = c("chr", "pos", "cluster_id", 
                                       "average_ccf", "lower_95_ci", "upper_95_ci"))
 clusterCertainty <- rename(clusterCertainty, most_likely_assignment = cluster_id)
-clusterCertainty$most_likely_assignment <- 
-  match(clusterCertainty$most_likely_assignment, 
-        sort(unique(clusterCertainty$most_likely_assignment)))
-
-tmp11 <- clusterCertainty[, c("chr", "pos", "most_likely_assignment")] 
-tmp11 <- rename(tmp11, cluster = most_likely_assignment)
-write.table(tmp11$cluster, file = "2A.txt", sep = "\t", row.names = F, col.names = F, quote = F)
-
 
 # subclonal_structure file
 tmp1 <- as.data.frame(table(clusterCertainty$most_likely_assignment), stringsAsFactors = F)
@@ -441,6 +433,15 @@ tmp <- mutate(tmp, proportion = as.numeric(proportion) * cellularity)
 tmp$lower_95_ci <- NULL
 tmp$upper_95_ci <- NULL
 write.table(tmp, file = "1C.txt", sep = "\t", row.names = F, col.names = F, quote = F)
+
+
+clusterCertainty$most_likely_assignment <- 
+  match(clusterCertainty$most_likely_assignment, 
+        sort(unique(clusterCertainty$most_likely_assignment)))
+tmp11 <- clusterCertainty[, c("chr", "pos", "most_likely_assignment")] 
+tmp11 <- rename(tmp11, cluster = most_likely_assignment)
+write.table(tmp11$cluster, file = "2A.txt", sep = "\t", row.names = F, col.names = F, quote = F)
+
 
 # graph summary
 fn = "clonal_results_summary.pdf"
