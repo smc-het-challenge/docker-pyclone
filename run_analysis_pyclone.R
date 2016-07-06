@@ -409,7 +409,6 @@ labelFile <- dir(paste0(pycloneFolder, "/trace/"), pattern = "labels", full.name
 labelTrace <- read.delim(labelFile, stringsAsFactors = F)
 ltmat <- as.matrix(labelTrace[-1:-burnIn, ssm$mutation_id])
 ltmat <- ltmat + 1
-unique(ltmat)
 psm <- comp.psm(ltmat)
 colnames(psm) <- ssm$mutation_id
 rownames(psm) <- ssm$mutation_id
