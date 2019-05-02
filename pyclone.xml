@@ -1,4 +1,4 @@
-<tool id="pyclone" name="PyClone Tool: Standard" version="0.1.0">
+<tool id="pyclone" name="PyClone Tool: Standard" version="0.2.0">
 
     <requirements>
         <container type="docker">docker-pyclone</container>
@@ -32,7 +32,6 @@
         <data format="txt" name="1C.txt" label="1C.txt" from_work_dir="1C.txt"/>
         <data format="txt" name="2A.txt" label="2A.txt" from_work_dir="2A.txt"/>
         <data format="txt" name="2B.txt" label="2B.txt" from_work_dir="2B.txt"/>
-        <data format="pdf" name="clonal_results_summary.pdf" label="clonal_results_summary.pdf" from_work_dir="clonal_results_summary.pdf"/>
     </outputs>
 
     <help><![CDATA[
