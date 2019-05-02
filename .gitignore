@@ -4,3 +4,5 @@
 .Ruserdata
 *.txt
 *.Rproj
+*.pdf
+pyclone_v*
