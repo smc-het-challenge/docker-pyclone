@@ -44,8 +44,6 @@ numMCMC <- as.integer(args[4])
 burnIn <- as.integer(args[5])
 maxSnv <- as.integer(args[6]) 
 
-
-
 ssm_file <- "ssm_data.txt"
 # Parse vcf file
 vcfParserPath <- dir(path = getwd(), pattern = "create_ccfclust_inputs.py", full.names = T)
@@ -70,15 +68,15 @@ ssm <- ParseSnvCnaBattenberg(ssm, cna)
 cellularity <-read.delim(purityFile, stringsAsFactors=FALSE)$cellularity
 ssm$purity <- cellularity
 ssm$vaf = ssm$var_counts/ssm$total_counts
-allSsm <- ccube:::CheckAndPrepareCcubeInupts(ssm)
+ssm <- ccube:::CheckAndPrepareCcubeInupts(ssm)
 
-allSsm <- dplyr::mutate(rowwise(allSsm), 
+ssm <- dplyr::mutate(rowwise(ssm), 
                         chr =  strsplit(mutation_id, split = "_")[[1]][1],
                         pos = strsplit(mutation_id, split = "_")[[1]][2]) 
 
 # 1st filter: major_cn == 0
-falsePositiveSsmIDs <- filter(allSsm, major_cn == 0 )$id
-ssm <- filter(allSsm, major_cn > 0)
+falsePositiveSsmIDs <- filter(ssm, major_cn == 0 )$id
+ssm <- filter(ssm, major_cn > 0)
 
 
 # 2nd filter: fp_qval, rough_ccf1, rough_ccf0, total_counts, var_counts 
@@ -139,7 +137,10 @@ dir.create(pycloneFolder, recursive = T)
 pycloneData <- data.frame(mutation_id = ssm$id, ref_counts = ssm$ref_counts, 
                           var_counts = ssm$var_counts,
                           normal_cn = ssm$normal_cn, minor_cn =ssm$minor_cn, major_cn = ssm$major_cn )
+rm(ssm)
 write.table(pycloneData, file=paste0(pycloneFolder, '/pyclone_data.tsv'), quote=FALSE, sep='\t', row.names = F)
+pycloneDataIDs <- pycloneData$mutation_id
+rm(pycloneData)
 shellCommand <- paste0("PyClone build_mutations_file ", 
                        pycloneFolder, '/pyclone_data.tsv ',
                        pycloneFolder, '/pyclone_mutations.yaml ', 
@@ -199,13 +200,18 @@ traceFile <- dir(paste0(pycloneFolder, "/trace"),
 paramsTrace <- read.delim(traceFile, stringsAsFactors = F, header = F)
 id <- as.character(paramsTrace[1,])
 tmp <- as.matrix( paramsTrace[-1:-(burnIn+1), ])
+rm(paramsTrace)
 class(tmp) <- "numeric"
 paramsEst <- colMeans(tmp)
+rm(tmp)
+
 names(paramsEst) <- NULL
 traceData <- data.frame(mutation_id = id, ccf = paramsEst)
  
 allData <- left_join(allData, traceData, by="mutation_id")
+rm(traceData)
 allData <- left_join(allData, mpear, by="mutation_id")
+rm(mpear)
 
 tt <- table(allData$cluster_id)
 clusterMean <- vector(mode = "numeric", length = length(tt))
@@ -231,14 +237,13 @@ clusterDf <- data.frame(cluster_id=as.integer(names(tt)),
                         average_ccf = clusterMean,
                         lower_95_ci = clusterMean - 2*clusterSd,
                         upper_95_ci = clusterMean + 2*clusterSd)
-allData <- left_join(allData, clusterDf, by="cluster_id" )
+allData <- dplyr::left_join(allData, clusterDf, by="cluster_id" )
 clusterDf <- dplyr::filter(clusterDf, !is.na(average_ccf))
 write.table(nrow(clusterDf), file = "1B.txt", sep = "\t", row.names = F, col.names=F, quote = F)
 
-id <- Reduce(rbind, strsplit(as.character(ssm$mutation_id), "_", fixed = T), c())
-mutAssign <- data.frame(mutation_id = ssm$id, chr = id[,1], pos = id[,2], 
-                        stringsAsFactors = F)
-allData <- left_join(allData, mutAssign, by = "mutation_id") 
+allData <- dplyr::left_join(allData, 
+                            data.frame(mutation_id = pycloneDataIDs), 
+                            by = "mutation_id") 
 
 ## Reassign low support data
 lowSupportData <- dplyr::filter(allData, is.na(average_ccf))
@@ -272,7 +277,7 @@ if(holdOutDataFlag) {
   holdOutData$mutation_id <- holdOutData$id
   holdOutData <- dplyr::select(holdOutData, colnames(allData))
   allData <- rbind(allData, holdOutData)
-  rm(holdOutR)
+  rm(holdOutR, holdOutData)
 }
 
 ## Post assign subclonal SSMs-- temporal solution
@@ -320,7 +325,7 @@ if (subClonalSsmFlag) {
   problemSsm <- dplyr::select(problemSsm, colnames(allData))
   allData <- rbind(allData, problemSsm)
   
-  rm(problemSsm)
+  rm(problemSsmR, problemSsm)
 }
 
 
@@ -341,7 +346,7 @@ if (FalsePositiveSsmFlag) {
   ssmPyClone = data.frame(id = allData$mutation_id)
   ssmPyClone = cbind(ssmPyClone,  allR)
 }
-
+rm(allR, fpR)
 
 ssmPyClone <- ssmPyClone[order(as.numeric(gsub("[^\\d]+", "", ssmPyClone$id, perl=TRUE))), ]
 rownames(ssmPyClone)<-NULL
@@ -349,16 +354,20 @@ allIDs <- ssmPyClone$id
 
 ssmPyClone$id <- NULL
 allRR <- Matrix::tcrossprod(as.matrix(ssmPyClone))
+rm(ssmPyClone)
 colnames(allRR) <- allIDs
 rownames(allRR) <- allIDs
-rm(allR)
+
 
 ltmat <- as.matrix(labelTrace[-1:-burnIn, ssm$mutation_id])
+rm(labelTrace)
 ltmat <- ltmat + 1
 psm <- comp.psm(ltmat)
+rm(ltmat)
 colnames(psm) <- ssm$mutation_id
 rownames(psm) <- ssm$mutation_id
 allRR[ssm$mutation_id, ssm$mutation_id] <- psm
+rm(psm)
 diag(allRR) <- 1
 
 write.table(allRR, file = "2B.txt", sep = "\t", row.names = F, col.names = F, quote = F)
@@ -368,6 +377,8 @@ rm(allRR)
 clusterCertainty <- subset(allData, 
                            select = c("mutation_id", "cluster_id", 
                                       "average_ccf"))
+rm(allData)
+
 if (FalsePositiveSsmFlag) {
   clusterCertainty <- rbind(clusterCertainty, data.frame(mutation_id = falsePositiveSsmIDs, 
                                                          cluster_id = max(clusterCertainty$cluster_id)+1,
@@ -376,10 +387,8 @@ if (FalsePositiveSsmFlag) {
                                             average_ccf = 0, lower_95_ci = 0, upper_95_ci = 0 ) )
 }
 
-clusterCertainty <- rename(clusterCertainty, most_likely_assignment = cluster_id)
-
 # subclonal_structure file
-tmp1 <- as.data.frame(table(clusterCertainty$most_likely_assignment), stringsAsFactors = F)
+tmp1 <- as.data.frame(table(clusterCertainty$cluster_id), stringsAsFactors = F)
 tmp1 <- mutate(tmp1, Var1 = as.integer(Var1))
 tmp <- left_join(tmp1, clusterDf, by = c("Var1"="cluster_id"))
 tmp <- rename(tmp, cluster = Var1, n_ssms = Freq, proportion = average_ccf)
@@ -390,9 +399,6 @@ tmp$upper_95_ci<-NULL
 write.table(tmp, file = "1C.txt", sep = "\t", row.names = F, col.names = F, quote = F)
 
 
-clusterCertainty$most_likely_assignment <- 
-  match(clusterCertainty$most_likely_assignment, 
-        sort(unique(clusterCertainty$most_likely_assignment)))
-tmp11 <- clusterCertainty[, c("mutation_id", "most_likely_assignment")] 
-tmp11 <- rename(tmp11, cluster = most_likely_assignment)
-write.table(tmp11$cluster, file = "2A.txt", sep = "\t", row.names = F, col.names = F, quote = F)
+clusterCertainty$cluster_id <- match(clusterCertainty$cluster_id, 
+                                     sort(unique(clusterCertainty$cluster_id)))
+write.table(clusterCertainty$cluster_id, file = "2A.txt", sep = "\t", row.names = F, col.names = F, quote = F)
