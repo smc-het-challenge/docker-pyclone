@@ -35,7 +35,7 @@
     </outputs>
 
     <help><![CDATA[
-        ccube purity tool - please see github for help: https://github.com/keyuan/docker-ccube.git
+        PyClone tool - please see github for help: https://github.com/keyuan/docker-pyclone/tree/smc-het-dev
     ]]></help>
 
 </tool>
