@@ -4,6 +4,8 @@ MAINTAINER "Ke Yuan" ke.yuan.09@gmail.com
 COPY ./PyDP-0.2.2.tar.gz /home/pipeline/PyDP-0.2.2.tar.gz
 COPY ./pyclone_ke.tar.gz /home/pipeline/pyclone_ke.tar.gz
 
+RUN apt-get update && apt-get upgrade -y python-pip
+
 RUN pip install pyyaml \
     && cd /home/pipeline/ \
     && tar xvfz /home/pipeline/PyDP-0.2.2.tar.gz \
