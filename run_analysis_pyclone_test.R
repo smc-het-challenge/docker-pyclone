@@ -44,9 +44,42 @@ numMCMC <- as.integer(args[4])
 burnIn <- as.integer(args[5])
 maxSnv <- as.integer(args[6]) 
 
+numMCMC <- 50
+burnIn <- 1
+maxSnv <- 100
+
+testSample = 1
+
+if (testSample == 1) {
+  vcfFile <- "~/Downloads/SMC-Het/P1-noXY/P1-noXY.mutect.vcf"
+  batternbergFile <- "~/Downloads/SMC-Het/P1-noXY/P1-noXY.battenberg.txt"
+  purityFile <- "~/Downloads/SMC-Het/P1-noXY/P1-noXY.cellularity_ploidy.txt"
+  
+}
+
+if (testSample == 2) {
+  vcfFile <- "~/Downloads/SMC-Het/P7-noXY/P7-noXY.mutect.vcf"
+  batternbergFile <- "~/Downloads/SMC-Het/P7-noXY/P7-noXY.battenberg.txt"
+  purityFile <- "~/Downloads/SMC-Het/P7-noXY/P7-noXY.cellularity_ploidy.txt"
+} 
+
+if (testSample == 3) { 
+  vcfFile <- "~/Downloads/SMC-Het/S3-noXY/S3-noXY.mutect.vcf"
+  batternbergFile <- "~/Downloads/SMC-Het/S3-noXY/S3-noXY.battenberg.txt"
+  purityFile <- "~/Downloads/SMC-Het/S3-noXY/S3-noXY.cellularity_ploidy.txt"
+}  
+
+if (testSample == 4) {
+  vcfFile <- "~/Downloads/SMC-Het/T2-noXY//T2-noXY.mutect.vcf"
+  batternbergFile <- "~/Downloads/SMC-Het/T2-noXY/T2-noXY.battenberg.txt"
+  purityFile <- "~/Downloads/SMC-Het/T2-noXY/T2-noXY.cellularity_ploidy.txt"
+  
+}
+
+
 ssm_file <- "ssm_data.txt"
 # Parse vcf file
-vcfParserPath <- "create_ccfclust_inputs.py"
+vcfParserPath <- dir(path = getwd(), pattern = "create_ccfclust_inputs.py", full.names = T)
 shellCommandMutectSmcHet <- paste(
   vcfParserPath,
   " -v mutect_smchet",
@@ -402,3 +435,24 @@ write.table(tmp, file = "1C.txt", sep = "\t", row.names = F, col.names = F, quot
 clusterCertainty$cluster_id <- match(clusterCertainty$cluster_id, 
                                      sort(unique(clusterCertainty$cluster_id)))
 write.table(clusterCertainty$cluster_id, file = "2A.txt", sep = "\t", row.names = F, col.names = F, quote = F)
+
+
+# graph summary
+fn = "clonal_results_summary.pdf"
+pdf(fn, width=8, height=8)
+myColors <- gg_color_hue(max(unique(ssm$cluster_id)))
+par(mfrow=c(2,2))
+plot(ssm$ccf, ssm$vaf, col = myColors[ssm$cluster_id], 
+     xlab = "cancer cell fraction", ylab = "variant allele frequecy", 
+     main = "ccf vs vaf (colored by cluster memebership)")
+hist(ssm$ccf, density=20, breaks=20, prob=TRUE, 
+     main = "ccf histogram",
+     xlab = "cancer cell fraction")
+clusterSize <- table(ssm$average_ccf)/nrow(ssm)
+names(clusterSize) <- as.character(format(round(as.numeric(names(clusterSize)), 2), nsmall = 2))
+tmp1 <- as.data.frame(table(ssm$average_ccf), stringsAsFactors = F)
+tmp2 <- as.data.frame(table(ssm$cluster_id), stringsAsFactors = F)
+tmp3 <- left_join(tmp1, tmp2, by ="Freq")
+barplot(clusterSize, las = 2, col = myColors[as.integer(tmp3$Var1.y)], xlab = "cluster mean", ylab="mutation proportions", 
+        main = "cluster sizes")
+dev.off()
