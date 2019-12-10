@@ -177,7 +177,7 @@ yamlScript <- cat(paste0("num_iters: ", numMCMC), "\n",
                 file = paste0(pycloneFolder, "/pyclone_configure.yaml")
 )
 
-dir.create(pycloneFolder,"/trace")
+dir.create(paste0(pycloneFolder,"trace"))
 
 shellCommand <- paste0("PyClone analyse ", 
                        pycloneFolder, '/pyclone_configure.yaml ',

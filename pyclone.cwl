@@ -60,8 +60,3 @@ outputs:
     type: File
     outputBinding:
       glob: 2B.txt
-
-  summary:
-    type: File
-    outputBinding:
-      glob: clonal_results_summary.pdf
