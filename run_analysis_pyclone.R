@@ -65,7 +65,7 @@ ssm <- read.delim(ssm_file,
 
 # Parse Battenberg CNA data
 cna <- read.delim(batternbergFile, stringsAsFactors = F)
-ssm <- ccube::ParseSnvCnaBattenberg(ssm, cna) 
+ssm <- ccube:::ParseSnvCnaBattenberg(ssm, cna) 
 
 cellularity <-read.delim(purityFile, stringsAsFactors=FALSE)$cellularity
 ssm$purity <- cellularity
