@@ -150,6 +150,10 @@ CheckAndPrepareCcubeInupts <- function(mydata, estimatePurity = T) {
   return(mydata)
 }
 
+MapVaf2CcfLinear <- function ( vaf, purity, normal_cn, total_cn, mult, epi = 1e-3 ) {
+  w = ( purity * (mult * (1-epi) - total_cn * epi ) ) / ( (1-purity) * normal_cn + purity * total_cn )
+  return( (vaf-epi)/w )
+}
 
 compute_mpear_label <- function(label_traces){
   ltmat <- as.matrix(label_traces)
@@ -245,8 +249,6 @@ falsePositiveSsmIDs <- c(falsePositiveSsmIDs, filter(ssm, fp_qval > 0.05  &
                                            rough_ccf1 < 0.2 &
                                            rough_ccf0 > -90
                                          )$id)
-
-
 
 if (length(falsePositiveSsmIDs)>0) {
   ssm = filter(ssm, !id %in% falsePositiveSsmIDs)
