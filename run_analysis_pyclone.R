@@ -39,8 +39,6 @@ ParseSnvCnaBattenberg <- function(ssm, cna) {
     }
   }
 
-
-
   ssm$normal_cn = 2
   ssm <- dplyr::rename(ssm, ref_counts=a, total_counts=d, mutation_id = gene)
   ssm <- dplyr::mutate(ssm, var_counts=total_counts-ref_counts)
@@ -79,6 +77,79 @@ ParseSnvCnaBattenberg <- function(ssm, cna) {
   ssm$pos <-NULL
   ssm
 }
+
+
+CheckAndPrepareCcubeInupts <- function(mydata, estimatePurity = T) {
+
+  stopifnot(
+    all(c("var_counts","ref_counts") %in% names(mydata)))
+
+  if ( "major_cn_sub1" %in% names(mydata) &
+       "minor_cn_sub1" %in% names(mydata) &
+       "major_cn_sub2" %in% names(mydata) &
+       "minor_cn_sub2" %in% names(mydata) &
+       "subclonal_cn" %in% names(mydata) &
+       "frac_cn_sub1" %in% names(mydata) &
+       "frac_cn_sub2" %in% names(mydata) ) {
+    mydata$subclonal_cn <- mydata$frac_cn_sub1 < 1
+    return(mydata)
+  }
+
+  if ( ! "frac_cn_sub1" %in% names(mydata) ) {
+    message(sprintf("Missing column: frac_cn_sub1. Assuming input copy number profiles are clonal"))
+    mydata$frac_cn_sub1 <- 1
+  }
+
+  if ( ! "frac_cn_sub2" %in% names(mydata) ) {
+    message(sprintf("Missing column: frac_cn_sub2. Set frac_cn_sub2 as 1- frac_cn_sub1"))
+    mydata$frac_cn_sub2 <- 1 - mydata$frac_cn_sub1
+  }
+
+  if ( ! "subclonal_cn" %in% names(mydata) ) {
+    message(sprintf("Missing column: subclonal_cn. Set subclonal_cn as frac_cn_sub1 < 1"))
+    mydata$subclonal_cn <- mydata$frac_cn_sub1 < 1
+  }
+
+  if ( ! "major_cn_sub1" %in% names(mydata) ) {
+    message(sprintf("Missing column: major_cn_sub1. Assuming input copy number profiles are clonal, set major_cn_sub1 as major_cn"))
+    stopifnot(all(c("major_cn") %in% names(mydata)))
+    mydata <- dplyr::rename(mydata, major_cn_sub1 = major_cn)
+  }
+
+  if ( ! "minor_cn_sub1" %in% names(mydata) ) {
+    message(sprintf("Missing column: minor_cn_sub1 Assuming input copy number profiles are clonal, set minor_cn_sub1 as minor_cn"))
+    stopifnot(all(c("minor_cn") %in% names(mydata)))
+    mydata <- dplyr::rename(mydata, minor_cn_sub1 = minor_cn)
+  }
+
+  if ( ! "major_cn_sub2" %in% names(mydata) ) {
+    message(sprintf("Missing column: major_cn_sub2 Assuming input copy number profiles are clonal, set major_cn_sub2 as -100"))
+    mydata$major_cn_sub2 <- -100
+  }
+
+  if ( ! "minor_cn_sub2" %in% names(mydata) ) {
+    message(sprintf("Missing column: minor_cn_sub2 Assuming input copy number profiles are clonal, set minor_cn_sub2 as -100"))
+    mydata$minor_cn_sub2 <- -100
+  }
+
+  mydata <- dplyr::mutate(mydata,
+                          major_cn = frac_cn_sub1 * major_cn_sub1 + frac_cn_sub2 * major_cn_sub2,
+                          minor_cn = frac_cn_sub1 * minor_cn_sub1 + frac_cn_sub2 * minor_cn_sub2,
+                          total_cn = major_cn + minor_cn)
+
+  if ( ! "normal_cn" %in% names(mydata) ) {
+    message(sprintf("Missing column: normal_cn. Set normal_cn as 2"))
+    mydata$normal_cn <- 2
+  }
+
+  if ( ! "purity" %in% names(mydata) & estimatePurity) {
+    message(sprintf("Missing column: purity. Estimate purity with GetPurity"))
+    mydata$purity <- GetPurity(mydata)
+  }
+
+  return(mydata)
+}
+
 
 compute_mpear_label <- function(label_traces){
   ltmat <- as.matrix(label_traces)
@@ -142,7 +213,7 @@ ssm <- ParseSnvCnaBattenberg(ssm, cna)
 cellularity <-read.delim(purityFile, stringsAsFactors=FALSE)$cellularity
 ssm$purity <- cellularity
 ssm$vaf = ssm$var_counts/ssm$total_counts
-ssm <- ccube:::CheckAndPrepareCcubeInupts(ssm)
+ssm <- CheckAndPrepareCcubeInupts(ssm)
 
 ssm <- dplyr::mutate(rowwise(ssm), 
                         chr =  strsplit(mutation_id, split = "_")[[1]][1],
