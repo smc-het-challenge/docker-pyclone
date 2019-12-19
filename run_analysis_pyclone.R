@@ -6,6 +6,80 @@ library(ccube)
 library(mcclust)
 options(stringsAsFactors = F)
 
+ParseSnvCnaBattenberg <- function(ssm, cna) {
+
+  id <- do.call(rbind, strsplit(as.character(ssm$gene), "_", fixed = T))
+  ssm$chr = id[,1]
+  ssm$pos = as.integer(id[,2])
+  ssm$major_cn_sub1 = NA
+  ssm$minor_cn_sub1 = NA
+  ssm$frac_cn_sub1 = NA
+  ssm$major_cn_sub2 = -100
+  ssm$minor_cn_sub2 = -100
+  ssm$frac_cn_sub2 = 0
+  ssm$mu_r <- NULL
+  ssm$mu_v <- NULL
+
+  for (jj in seq_len(nrow(cna)) ) {
+    cc = cna[jj,]
+    idx = which(ssm$chr == cc$chr &  (ssm$pos >= cc$startpos & ssm$pos <= cc$endpos) )
+    if (length(idx) > 0) {
+      ssm[idx, ]$major_cn_sub1 <- cc$nMaj1_A
+      ssm[idx, ]$minor_cn_sub1 <- cc$nMin1_A
+      ssm[idx, ]$frac_cn_sub1 <- cc$frac1_A
+      ssm[idx, ]$frac_cn_sub2 <- 1 - cc$frac1_A
+
+      if (  !is.na(  cc$nMaj2_A ) ) {
+        ssm[idx, ]$major_cn_sub2 <- cc$nMaj2_A
+        ssm[idx, ]$minor_cn_sub2 <- cc$nMin2_A
+      } else {
+        ssm[idx, ]$major_cn_sub2 <- -100
+        ssm[idx, ]$minor_cn_sub2 <- -100
+      }
+    }
+  }
+
+
+
+  ssm$normal_cn = 2
+  ssm <- dplyr::rename(ssm, ref_counts=a, total_counts=d, mutation_id = gene)
+  ssm <- dplyr::mutate(ssm, var_counts=total_counts-ref_counts)
+
+  HasNonOverLappingSsm <-  sum( is.na(ssm$major_cn_sub1) ) > 0
+  if ( HasNonOverLappingSsm ) {
+
+    nonOverLappingSsm <- dplyr::filter(ssm, is.na(major_cn_sub1) )
+
+    for ( ii in 1:nrow(nonOverLappingSsm)  ) {
+      ref_range_ssm = which(ssm$chr == nonOverLappingSsm[ii, ]$chr & !is.na(ssm$major_cn_sub1) )
+      ref_idx = which.min(  abs( ssm[ref_range_ssm,]$pos - nonOverLappingSsm[ii, ]$pos) )
+      idx = ref_range_ssm[ref_idx]
+      nonOverLappingSsm[ii, ]$major_cn_sub1 <- ssm[idx, ]$major_cn_sub1
+      nonOverLappingSsm[ii, ]$minor_cn_sub1 <- ssm[idx, ]$minor_cn_sub1
+      nonOverLappingSsm[ii, ]$frac_cn_sub1 <- ssm[idx, ]$frac_cn_sub1
+      nonOverLappingSsm[ii, ]$frac_cn_sub2 <- ssm[idx, ]$frac_cn_sub2
+      nonOverLappingSsm[ii, ]$major_cn_sub2 <- ssm[idx, ]$major_cn_sub2
+      nonOverLappingSsm[ii, ]$minor_cn_sub2 <- ssm[idx, ]$minor_cn_sub2
+    }
+
+    ssm[which(ssm$id %in% nonOverLappingSsm$id), ] = nonOverLappingSsm
+
+  }
+
+  # check gender
+  maleCna <- dplyr::filter(cna, chr %in% c("Y", "y") & !is.na(nMaj1_A) )
+  isMale <- nrow(maleCna) > 0
+
+  if (isMale) {
+    ssm <- dplyr::mutate(dplyr::rowwise(ssm),
+                         normal_cn = if (chr %in% c("X", "Y", "x", "y") ) {1} else {2}  )
+  }
+
+  ssm$chr <-NULL
+  ssm$pos <-NULL
+  ssm
+}
+
 compute_mpear_label <- function(label_traces){
   ltmat <- as.matrix(label_traces)
   ltmat <- ltmat + 1
