@@ -22,6 +22,6 @@ COPY ./run_analysis_pyclone.R /home/pipeline/run_analysis_pyclone.R
 
 RUN chmod +x /home/pipeline/create_ccfclust_inputs.py \
     && chmod +x /home/pipeline/run_analysis_pyclone.R \
-    && chmod +w /usr/local/lib/R/site-library
+    && chmod 777 /usr/local/lib/R/site-library
     
 ENV PATH=/home/pipeline:$PATH
