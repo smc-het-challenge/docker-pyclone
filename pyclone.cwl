@@ -4,7 +4,7 @@ label: PyClone
 baseCommand: ["Rscript", "/home/pipeline/run_analysis_pyclone.R"]
 requirements:
   - class: DockerRequirement
-    dockerPull: smcheteval/pyclone:0.2
+    dockerPull: smcheteval/pyclone:0.1
 
 inputs:
   input_vcf:

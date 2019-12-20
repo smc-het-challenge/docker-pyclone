@@ -6,9 +6,6 @@ library(ccube)
 library(mcclust)
 options(stringsAsFactors = F)
 
-source("util.R")
-source("ccube.R")
-
 compute_mpear_label <- function(label_traces){
   ltmat <- as.matrix(label_traces)
   ltmat <- ltmat + 1
