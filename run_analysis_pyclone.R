@@ -2,6 +2,8 @@
 
 rm(list = ls())
 library(dplyr)
+require(devtools)
+devtools::install_github("keyuan/ccube")
 library(ccube)
 library(mcclust)
 options(stringsAsFactors = F)
