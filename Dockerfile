@@ -19,8 +19,12 @@ RUN pip install pyyaml \
 
 COPY ./create_ccfclust_inputs.py /home/pipeline/create_ccfclust_inputs.py
 COPY ./run_analysis_pyclone.R /home/pipeline/run_analysis_pyclone.R
+COPY ./ccube.R /home/pipeline/ccube.R
+COPY ./util.R /home/pipeline/util.R
 
 RUN chmod +x /home/pipeline/create_ccfclust_inputs.py \
-    && chmod +x /home/pipeline/run_analysis_pyclone.R
+    && chmod +x /home/pipeline/run_analysis_pyclone.R \
+    && chmod +x /home/pipeline/ccube.R \
+    && chmod +x /home/pipeline/util.R
     
 ENV PATH=/home/pipeline:$PATH
