@@ -1,5 +1,4 @@
-FROM keyuan/docker-ccube
-MAINTAINER "Ke Yuan" ke.yuan.09@gmail.com
+FROM smcheteval/docker-ccube
 
 COPY ./PyDP-0.2.2.tar.gz /home/pipeline/PyDP-0.2.2.tar.gz
 COPY ./pyclone_ke.tar.gz /home/pipeline/pyclone_ke.tar.gz
