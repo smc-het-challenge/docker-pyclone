@@ -1,4 +1,4 @@
-FROM smcheteval/docker-ccube:0.1
+FROM smcheteval/ccube:0.1
 
 COPY ./PyDP-0.2.2.tar.gz /home/pipeline/PyDP-0.2.2.tar.gz
 COPY ./pyclone_ke.tar.gz /home/pipeline/pyclone_ke.tar.gz
