@@ -4,7 +4,7 @@ label: PyClone
 baseCommand: ["Rscript", "/home/pipeline/run_analysis_pyclone.R"]
 requirements:
   - class: DockerRequirement
-    dockerPull: smcheteval/pyclone:0.1
+    dockerPull: smcheval/pyclone:0.2
 
 inputs:
   input_vcf:
@@ -24,13 +24,13 @@ inputs:
 
   num_mcmc:
     type: int
-    default: 10
+    default: 5000
     inputBinding:
       position: 4
 
   burn_in:
     type: int
-    default: 2
+    default: 2000
     inputBinding:
       position: 5
 

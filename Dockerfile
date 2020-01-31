@@ -1,9 +1,8 @@
-FROM smcheteval/ccube:0.1
+FROM smcheteval/docker-ccube
+MAINTAINER "Kami Chiotti" chiotti@ohsu.edu
 
 COPY ./PyDP-0.2.2.tar.gz /home/pipeline/PyDP-0.2.2.tar.gz
 COPY ./pyclone_ke.tar.gz /home/pipeline/pyclone_ke.tar.gz
-
-RUN apt-get update && apt-get upgrade -y python-pip
 
 RUN pip install pyyaml \
     && cd /home/pipeline/ \
@@ -16,10 +15,5 @@ RUN pip install pyyaml \
     && python setup.py install \
     && cd /home/
 
-COPY ./create_ccfclust_inputs.py /home/pipeline/create_ccfclust_inputs.py
 COPY ./run_analysis_pyclone.R /home/pipeline/run_analysis_pyclone.R
-
-RUN chmod +x /home/pipeline/create_ccfclust_inputs.py \
-    && chmod +x /home/pipeline/run_analysis_pyclone.R
-    
-ENV PATH=/home/pipeline:$PATH
+RUN chmod +x /home/pipeline/run_analysis_pyclone.R
