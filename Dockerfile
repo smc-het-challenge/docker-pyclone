@@ -1,4 +1,4 @@
-FROM smcheteval/docker-ccube
+FROM smcheteval/ccube
 MAINTAINER "Kami Chiotti" chiotti@ohsu.edu
 
 COPY ./PyDP-0.2.2.tar.gz /home/pipeline/PyDP-0.2.2.tar.gz
