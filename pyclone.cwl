@@ -4,7 +4,7 @@ label: PyClone
 baseCommand: ["Rscript", "/home/pipeline/run_analysis_pyclone.R"]
 requirements:
   - class: DockerRequirement
-    dockerPull: smcheval/pyclone:0.2
+    dockerPull: smcheteval/pyclone:0.2
 
 inputs:
   input_vcf:
@@ -42,21 +42,21 @@ inputs:
 
 outputs:
   population:
-    type: File
+    type: [File, "null"]
     outputBinding:
       glob: 1B.txt
 
   proportion:
-    type: File
+    type: [File, "null"]
     outputBinding:
       glob: 1C.txt
 
   cluster_assignment:
-    type: File
+    type: [File, "null"]
     outputBinding:
       glob: 2A.txt
 
   cocluster_assignment:
-    type: File
+    type: [File, "null"]
     outputBinding:
       glob: 2B.txt
